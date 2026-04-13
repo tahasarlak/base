@@ -1,0 +1,38 @@
+{
+  "auth": {
+    "welcome": "خوش آمدید",
+    "description": "برای ادامه لطفاً وارد حساب کاربری خود شوید",
+    "login": "ورود",
+    "register": "ثبت‌نام",
+    "email": "ایمیل",
+    "password": "رمز عبور",
+    "name": "نام و نام خانوادگی",
+    "loginButton": "ورود به حساب",
+    "registerButton": "ثبت‌نام",
+    "forgotPassword": "فراموشی رمز عبور؟",
+    "magicLink": "ورود بدون رمز",
+    "resetPassword": "ریست رمز عبور",
+    "resetPasswordDescription": "لینک ریست به ایمیل شما ارسال خواهد شد",
+    "sendReset": "ارسال لینک ریست",
+    "backToLogin": "بازگشت به صفحه ورود",
+    "magicLinkSent": "لینک ورود به ایمیل شما ارسال شد",
+    "resetLinkSent": "لینک ریست رمز به ایمیل ارسال شد",
+    "enterEmail": "لطفاً ایمیل خود را وارد کنید",
+    "loginFailed": "ورود ناموفق بود",
+    "registerFailed": "ثبت‌نام ناموفق بود",
+    "oauthError": "ورود با {{provider}} با مشکل مواجه شد",
+    "orContinueWith": "یا ادامه دهید با",
+    "checkEmail": "لطفاً ایمیل خود را چک کنید"
+  },
+  "common": {
+    "signOutSuccess": "با موفقیت خارج شدید",
+    "signOutError": "خطا در خروج از حساب",
+    "dashboard": "داشبورد"
+  },
+  "Dashboard": {
+    "title": "داشبورد",
+    "welcome": "خوش آمدید، {name}!",
+    "settings": "تنظیمات",
+    "profile":"پروفایل"
+    }
+}

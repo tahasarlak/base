@@ -1,0 +1,17 @@
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+  try {
+    await resend.emails.send({
+      from: 'no-reply@universalstarter.com', // ← این رو بعداً به دامنه خودت تغییر بده
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    console.error('Email sending failed:', error);
+    throw new Error('ارسال ایمیل با مشکل مواجه شد');
+  }
+}

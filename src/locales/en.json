@@ -1,0 +1,32 @@
+{
+  "auth": {
+    "welcome": "Welcome",
+    "description": "Sign in to continue",
+    "login": "Sign In",
+    "register": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full Name",
+    "loginButton": "Sign In",
+    "registerButton": "Create Account",
+    "forgotPassword": "Forgot Password?",
+    "magicLink": "Magic Link",
+    "resetPassword": "Reset Password",
+    "resetPasswordDescription": "A reset link will be sent to your email",
+    "sendReset": "Send Reset Link",
+    "backToLogin": "Back to Login",
+    "magicLinkSent": "Magic link sent to your email",
+    "resetLinkSent": "Reset link sent to your email",
+    "enterEmail": "Please enter your email",
+    "loginFailed": "Login failed",
+    "registerFailed": "Registration failed",
+    "oauthError": "Sign in with {{provider}} failed",
+    "orContinueWith": "Or continue with",
+    "checkEmail": "Please check your email"
+  },
+  "common": {
+    "signOutSuccess": "Signed out successfully",
+    "signOutError": "Error signing out",
+    "dashboard": "Dashboard"
+  }
+}
