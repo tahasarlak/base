@@ -95,7 +95,7 @@ export default function ProductContent() {
     <div className="space-y-6">
       {/* هدر صفحه */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">محصولات و فروشگاه</h1>
+        <h1 className="text-3xl font-bold tracking-tight"></h1>
         <div className="flex gap-3">
           <Button onClick={refresh} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />

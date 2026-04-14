@@ -1,6 +1,6 @@
-import { courses, courseModules, courseLessons } from '@/lib/db/schema';
+// types/courses.ts
 
-export type Course = typeof courses.$inferSelect;
+export type Course = typeof import('@/lib/db/schema').courses.$inferSelect;
 
 export type CourseWithRelations = Course & {
   category?: {
@@ -13,17 +13,27 @@ export type CourseWithRelations = Course & {
     name: string | null;
     image?: string | null;
   } | null;
+  instructors?: Array<{
+    instructorId: string;
+    role: string;
+    revenueSharePercent: string | null;
+    instructor?: {
+      id: string;
+      name: string | null;
+      image?: string | null;
+    };
+  }>;
   modules?: ModuleWithLessons[];
 };
 
-export type ModuleWithLessons = typeof courseModules.$inferSelect & {
+export type ModuleWithLessons = typeof import('@/lib/db/schema').courseModules.$inferSelect & {
   lessons: LessonWithInstructors[];
 };
 
-export type LessonWithInstructors = typeof courseLessons.$inferSelect & {
+export type LessonWithInstructors = typeof import('@/lib/db/schema').courseLessons.$inferSelect & {
   instructors?: Array<{
     instructorId: string;
-    revenueSharePercent: number;
+    revenueSharePercent: string | null;
     instructor?: {
       id: string;
       name: string | null;
@@ -44,17 +54,26 @@ export type CourseFilters = {
 
 export type CreateCourseInput = {
   title: string;
+  subtitle?: string | null;
+  shortDescription?: string | null;
   description?: string | null;
   categoryId?: string | null;
+  semesterId?: string | null;
+  mainInstructorId: string;
   price: number;
   discountPrice?: number | null;
+  compareAtPrice?: number | null;
   duration?: number | null;
-  level?: string;
+  level?: 'beginner' | 'intermediate' | 'advanced' | 'all_levels';
+  language?: string;
   thumbnail?: string | null;
+  featuredImage?: string | null;
   isPublished?: boolean;
   isFree?: boolean;
   maxStudents?: number | null;
-  prerequisites?: any;
+  prerequisites?: string[];
+  whatYouWillLearn?: string[];
+  requirements?: string[];
 };
 
 export type UpdateCourseInput = Partial<CreateCourseInput> & {
@@ -63,18 +82,14 @@ export type UpdateCourseInput = Partial<CreateCourseInput> & {
 
 export type LessonFormData = {
   title: string;
-  description?: string;
-  type: string;
-  videoUrl?: string;
-  fileUrl?: string;
-  duration?: number;
-  isPublished: boolean;
-  isFreePreview: boolean;
-  estimatedTime?: number;
-  difficulty: string;
-  tags?: string[];
-  instructorShares: Array<{
-    instructorId: string;
-    revenueSharePercent: number;
-  }>;
+  description?: string | null;
+  type: 'video' | 'text' | 'quiz' | 'assignment' | 'file' | 'live' | 'reading' | 'scorm';
+  content?: any;
+  videoUrl?: string | null;
+  duration?: number | null;
+  isPublished?: boolean;
+  isFreePreview?: boolean;
+  estimatedTime?: number | null;
+  difficulty?: string;
+  tags?: string[] | null;
 };

@@ -1,8 +1,9 @@
+// hooks.ts
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
 import { getProducts } from './actions';
-import { ProductFilters, ProductWithRelations } from './types';
+import type { ProductFilters, ProductWithRelations } from './types';
 
 export function useProducts(initialFilters: ProductFilters = {}) {
   const [data, setData] = useState<ProductWithRelations[]>([]);
@@ -25,13 +26,11 @@ export function useProducts(initialFilters: ProductFilters = {}) {
 
       const result = await getProducts(updatedFilters);
 
-      // تبدیل داده‌های دریافتی به شکل مورد نظر نوع ProductWithRelations
-      const formattedData: ProductWithRelations[] = (result.data || []).map((product: any) => ({
-        ...product,
-        tags: product.tags
-          ?.map((t: any) => t.tag)                    // استخراج tag واقعی
-          .filter((tag: any): tag is NonNullable<typeof tag> => tag !== null) || [],
-        categories: product.categories || [],
+      // تبدیل امن نوع (برای جلوگیری از خطای TypeScript)
+      const formattedData: ProductWithRelations[] = (result.data || []).map((item: any) => ({
+        ...item,
+        averageRating: item.averageRating ? Number(item.averageRating) : null,
+        reviewCount: item.reviewCount ?? null,
       }));
 
       setData(formattedData);
@@ -50,7 +49,7 @@ export function useProducts(initialFilters: ProductFilters = {}) {
   // لود اولیه
   useEffect(() => {
     fetchProducts();
-  }, []);   // وابستگی خالی — فقط یک بار
+  }, [fetchProducts]);   // وابستگی به fetchProducts
 
   const changePage = (newPage: number) => {
     fetchProducts({ page: newPage });
@@ -60,14 +59,19 @@ export function useProducts(initialFilters: ProductFilters = {}) {
     fetchProducts({ page: 1 });
   }, [fetchProducts]);
 
+  const updateFilters = (newFilters: Partial<ProductFilters>) => {
+    fetchProducts(newFilters);
+  };
+
   return {
     data,
     total,
     loading,
     error,
-    changePage,
-    refresh,
     page: filters.page || 1,
     pageSize: filters.pageSize || 15,
+    changePage,
+    refresh,
+    updateFilters,
   };
 }

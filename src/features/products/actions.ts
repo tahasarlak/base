@@ -1,14 +1,24 @@
+// actions/products.ts
 'use server';
 
 import { db } from '@/lib/db';
-import { products } from '@/lib/db/schema';
-import { eq, desc, ilike, and, count, gte, lte } from 'drizzle-orm';
+import { 
+  products, 
+  productVariants, 
+  productCategories, 
+  productCategoryRelationsTable,
+  productTags,
+  productSpecifications,
+  productDigitalFiles,
+  productShippingInfo,
+  productReviews 
+} from '@/lib/db/schema';
+import { eq, desc, ilike, and, count, gte, lte, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { ProductFilters, CreateProductInput, UpdateProductInput } from './types';
 
-/**
- * دریافت لیست محصولات با pagination و فیلتر
- */
+
+// ==================== دریافت لیست محصولات ====================
 export async function getProducts(filters: ProductFilters = {}) {
   const {
     page = 1,
@@ -19,46 +29,48 @@ export async function getProducts(filters: ProductFilters = {}) {
     isFeatured,
     minPrice,
     maxPrice,
+    categoryId,
   } = filters;
 
   const offset = (page - 1) * pageSize;
 
-  const whereConditions: any[] = [];
+  const whereConditions = [];
 
   if (search) {
     whereConditions.push(ilike(products.title, `%${search}%`));
   }
-  if (type) {
-    whereConditions.push(eq(products.type, type));
-  }
-  if (status) {
-    whereConditions.push(eq(products.status, status));
-  }
-  if (isFeatured !== undefined) {
-    whereConditions.push(eq(products.isFeatured, isFeatured));
-  }
-  if (minPrice !== undefined) {
-    whereConditions.push(gte(products.price, minPrice));
-  }
-  if (maxPrice !== undefined) {
-    whereConditions.push(lte(products.price, maxPrice));
+  if (type) whereConditions.push(eq(products.type, type));
+  if (status) whereConditions.push(eq(products.status, status));
+  if (isFeatured !== undefined) whereConditions.push(eq(products.isFeatured, isFeatured));
+  if (minPrice !== undefined) whereConditions.push(gte(products.price, minPrice));
+  if (maxPrice !== undefined) whereConditions.push(lte(products.price, maxPrice));
+  if (categoryId) {
+    whereConditions.push(
+      sql`${products.id} IN (SELECT product_id FROM ${productCategoryRelationsTable} WHERE category_id = ${categoryId})`
+    );
   }
 
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-  // نسخه ساده بدون with برای جلوگیری از ارور رابطه (categories و tags)
+  // دریافت محصولات با relations مهم
   const productList = await db.query.products.findMany({
     where: whereClause,
     orderBy: [desc(products.createdAt)],
     limit: pageSize,
     offset,
-    // با کامنت کردن with، ارور "There is not enough information to infer relation" رفع می‌شود
-    // with: {
-    //   categories: true,
-    //   tags: {
-    //     with: { tag: true },
-    //   },
-    // },
+    with: {
+      variants: true,
+      categories: {
+        with: { category: true },
+      },
+      tags: {
+        with: { tag: true },
+      },
+      specifications: true,
+      digitalFiles: true,
+      shippingInfo: true,
+      reviews: true,
+    },
   });
 
   const totalResult = await db
@@ -76,9 +88,7 @@ export async function getProducts(filters: ProductFilters = {}) {
   };
 }
 
-/**
- * ایجاد محصول جدید
- */
+// ==================== ایجاد محصول جدید ====================
 export async function createProduct(data: CreateProductInput) {
   const slug = data.title
     .toLowerCase()
@@ -90,10 +100,12 @@ export async function createProduct(data: CreateProductInput) {
   const [newProduct] = await db.insert(products).values({
     title: data.title,
     slug,
-    description: data.description || null,
+    subtitle: data.subtitle || null,
     shortDescription: data.shortDescription || null,
+    description: data.description || null,
     price: data.price,
     discountPrice: data.discountPrice || null,
+    compareAtPrice: data.compareAtPrice || null,
     type: data.type,
     status: data.status || 'draft',
     featuredImage: data.featuredImage || null,
@@ -104,14 +116,23 @@ export async function createProduct(data: CreateProductInput) {
     publishedAt: data.status === 'published' ? new Date() : null,
   }).returning();
 
-  console.log(`✅ محصول جدید ایجاد شد | ID: ${newProduct.id} | Title: ${newProduct.title}`);
+  // اضافه کردن دسته‌بندی‌ها (اگر وجود داشت)
+  if (data.categoryIds && data.categoryIds.length > 0) {
+    await db.insert(productCategoryRelationsTable).values(
+      data.categoryIds.map(categoryId => ({
+        productId: newProduct.id,
+        categoryId,
+      }))
+    );
+  }
 
+  console.log(`✅ محصول جدید ایجاد شد | ID: ${newProduct.id} | Title: ${newProduct.title}`);
+  revalidatePath('/dashboard/products');
+  
   return newProduct;
 }
 
-/**
- * ویرایش محصول
- */
+// ==================== ویرایش محصول ====================
 export async function updateProduct(data: UpdateProductInput) {
   const { id, ...updateData } = data;
 
@@ -125,16 +146,16 @@ export async function updateProduct(data: UpdateProductInput) {
     .where(eq(products.id, id))
     .returning();
 
+  revalidatePath('/dashboard/products');
   console.log(`✅ محصول ویرایش شد | ID: ${updatedProduct.id}`);
 
   return updatedProduct;
 }
 
-/**
- * حذف محصول
- */
+// ==================== حذف محصول ====================
 export async function deleteProduct(id: string) {
   await db.delete(products).where(eq(products.id, id));
+  
   revalidatePath('/dashboard/products');
   console.log(`🗑️ محصول حذف شد | ID: ${id}`);
 }

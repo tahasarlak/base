@@ -2,9 +2,9 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { users, auditLogs } from '@/lib/db/schema';
+import { auditLogs, users } from '@/lib/db/schema';
 import { desc, sql, eq, gte, lt, and, count } from 'drizzle-orm';
-import { AuditLog, AuditFilters } from './types';
+import type { AuditLog, AuditFilters } from './types';
 
 export async function getAuditLogs(filters: AuditFilters = {}): Promise<{
   data: AuditLog[];
@@ -16,31 +16,42 @@ export async function getAuditLogs(filters: AuditFilters = {}): Promise<{
   const pageSize = filters.pageSize || 20;
   const offset = (page - 1) * pageSize;
 
-  let whereConditions: any[] = [];
+  const whereConditions = [];
 
+  // فیلترهای اصلی
+  if (filters.event) whereConditions.push(eq(auditLogs.event, filters.event));
   if (filters.action) whereConditions.push(eq(auditLogs.action, filters.action));
-  if (filters.targetType) whereConditions.push(eq(auditLogs.targetType, filters.targetType));
+  if (filters.entityType) whereConditions.push(eq(auditLogs.entityType, filters.entityType));
   if (filters.userId) whereConditions.push(eq(auditLogs.userId, filters.userId));
-  if (filters.startDate) whereConditions.push(gte(auditLogs.createdAt, new Date(filters.startDate)));
-  if (filters.endDate) whereConditions.push(lt(auditLogs.createdAt, new Date(filters.endDate)));
+
+  // فیلتر تاریخ
+  if (filters.startDate) {
+    whereConditions.push(gte(auditLogs.createdAt, new Date(filters.startDate)));
+  }
+  if (filters.endDate) {
+    whereConditions.push(lt(auditLogs.createdAt, new Date(filters.endDate)));
+  }
+
+  // جستجوی متنی
   if (filters.search) {
     whereConditions.push(
-      sql`(${auditLogs.action} ILIKE ${`%${filters.search}%`} OR 
-           ${auditLogs.targetType} ILIKE ${`%${filters.search}%`})`
+      sql`(${auditLogs.event} ILIKE ${`%${filters.search}%`} 
+           OR ${auditLogs.entityType} ILIKE ${`%${filters.search}%`}
+           OR ${auditLogs.action} ILIKE ${`%${filters.search}%`})`
     );
   }
 
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-  // دریافت لاگ‌ها + نام کاربر
   const logs = await db
     .select({
       id: auditLogs.id,
       userId: auditLogs.userId,
       userName: users.name,
+      event: auditLogs.event,
       action: auditLogs.action,
-      targetId: auditLogs.targetId,
-      targetType: auditLogs.targetType,
+      entityType: auditLogs.entityType,
+      entityId: auditLogs.entityId,
       oldValue: auditLogs.oldValue,
       newValue: auditLogs.newValue,
       ipAddress: auditLogs.ipAddress,
@@ -54,9 +65,8 @@ export async function getAuditLogs(filters: AuditFilters = {}): Promise<{
     .limit(pageSize)
     .offset(offset);
 
-  // تعداد کل
   const [{ count: totalCount }] = await db
-    .select({ count: sql<number>`count(*)` })
+    .select({ count: count() })
     .from(auditLogs)
     .where(whereClause);
 

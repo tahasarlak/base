@@ -1,0 +1,1 @@
+ALTER TABLE "course_lesson" ADD COLUMN "tags" jsonb;

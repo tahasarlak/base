@@ -76,7 +76,14 @@ export async function registerWithEmail(formData: FormData) {
 
   try {
     await auth.api.signUpEmail({
-      body: validated.data,
+      body: {
+        ...validated.data,
+        // فیلدهای اضافی کاربر
+        bio: '',
+        phone: '',
+        location: '',
+        website: '',
+      },
       headers: await headers(),
     });
 
@@ -90,11 +97,17 @@ export async function registerWithEmail(formData: FormData) {
     if (error.digest?.startsWith('NEXT_REDIRECT')) {
       throw error;
     }
+
     console.error('Register error:', error);
-    throw new Error(error.message || 'ثبت‌نام با مشکل مواجه شد');
+
+    if (error.statusCode === 422 || error.body?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {
+      throw new Error('این ایمیل قبلاً ثبت‌نام شده است. لطفاً از ایمیل دیگری استفاده کنید.');
+    }
+
+    // خطای اصلی بهتر نمایش داده شود
+    throw new Error(error.message || error.body?.message || 'ثبت‌نام با مشکل مواجه شد');
   }
 }
-
 // ==================== SEND MAGIC LINK ====================
 export async function sendMagicLink(formData: FormData) {
   const email = formData.get('email') as string;

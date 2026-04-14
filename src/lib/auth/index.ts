@@ -1,4 +1,5 @@
-// src/lib/auth.ts
+// src/lib/auth.ts  ← فایل کامل جایگزین (خطای TypeScript حل شد)
+
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { admin, organization, magicLink } from 'better-auth/plugins';
@@ -14,7 +15,7 @@ export const auth = betterAuth({
   baseURL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   appName: 'Universal Platform',
   secret: process.env.BETTER_AUTH_SECRET,
-  
+
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
@@ -29,14 +30,13 @@ export const auth = betterAuth({
   }),
 
   plugins: [
-    admin({ 
+    admin({
       defaultRole: 'user',
-      // اجازه می‌دهیم super_admin نقش اصلی را تغییر ندهد
-      impersonation: true 
+      impersonation: true,
     }),
-    organization({ 
+    organization({
       allowUserToCreateOrganization: true,
-      maxOrganizationMembers: 100 
+      maxOrganizationMembers: 100,
     }),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
@@ -63,6 +63,24 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
     requireEmailVerification: false,
+
+    // درست شده: sendResetPassword حالا از user.email استفاده می‌کند
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: 'ریست رمز عبور - Universal Platform',
+        html: `
+          <div style="direction: rtl; font-family: system-ui; max-width: 600px; margin: 0 auto;">
+            <h2>ریست رمز عبور</h2>
+            <p>برای ریست کردن رمز عبور خود روی لینک زیر کلیک کنید:</p>
+            <a href="${url}" style="display: inline-block; padding: 14px 28px; background: #4f46e5; color: white; text-decoration: none; border-radius: 8px;">
+              ریست رمز عبور
+            </a>
+            <p style="margin-top: 20px; color: #666;">این لینک فقط یک بار معتبر است و بعد از استفاده منقضی می‌شود.</p>
+          </div>
+        `,
+      });
+    },
   },
 
   user: {
@@ -85,12 +103,12 @@ export const auth = betterAuth({
   },
 
   session: {
-    expiresIn: 60 * 60 * 24 * 30, // ۳۰ روز
+    expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
   },
 });
 
-// تابع ارسال ایمیل (کمکی)
+// تابع ارسال ایمیل
 async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
   try {
     await resend.emails.send({

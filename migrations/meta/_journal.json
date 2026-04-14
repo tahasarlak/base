@@ -85,6 +85,83 @@
       "when": 1776071636794,
       "tag": "0011_groovy_fenris",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1776119118063,
+      "tag": "0012_open_wolf_cub",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1776122024728,
+      "tag": "0013_silky_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1776122942017,
+      "tag": "0014_brave_lyja",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1776123147128,
+      "tag": "0015_bouncy_hulk",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1776123416309,
+      "tag": "0016_marvelous_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1776124071139,
+      "tag": "0017_majestic_falcon",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1776124351642,
+      "tag": "0018_zippy_gertrude_yorkes",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1776124712456,
+      "tag": "0019_magical_tusk",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1776124788855,
+      "tag": "0020_fancy_hiroim",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1776124923393,
+      "tag": "0021_wild_norrin_radd",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1776125059543,
+      "tag": "0022_aspiring_hannibal_king",
+      "breakpoints": true
     }
   ]
 }
